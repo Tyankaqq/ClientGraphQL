@@ -1,0 +1,58 @@
+﻿@page "/ManagersList"
+@using ClientGraphQL.DataAccess
+@using ClientGraphQL.DataAccess.Model
+
+<h3>Список менеджеров с персональными данными</h3>
+
+@if (_managers == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (_managers.Count == 0)
+{
+    <p><em>Нет менеджеров</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Имя</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var manager in _managers)
+            {
+                <tr>
+                    <td>@manager.Name</td>
+                    <td>@manager.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Manager>? _managers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string query = @"
+            query {
+                managers {
+                    name
+                    email
+                }
+            }";
+
+            _managers = await Query.ExecuteQueryReturnListAsync<Manager>("managers", query);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching managers: {ex.Message}");
+        }
+    }
+}

@@ -1,0 +1,58 @@
+﻿@page "/RentersList"
+@using ClientGraphQL.DataAccess
+@using ClientGraphQL.DataAccess.Model
+
+<h3>Список арендаторов с персональными данными</h3>
+
+@if (_renters == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (_renters.Count == 0)
+{
+    <p><em>Нет арендаторов</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Имя</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var renter in _renters)
+            {
+                <tr>
+                    <td>@renter.Name</td>
+                    <td>@renter.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Renter>? _renters;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string query = @"
+            query {
+                renters {
+                    name
+                    email
+                }
+            }";
+
+            _renters = await Query.ExecuteQueryReturnListAsync<Renter>("renters", query);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching renters: {ex.Message}");
+        }
+    }
+}

@@ -1,0 +1,72 @@
+﻿@page "/CarsAvailableOnDates"
+@using ClientGraphQL.DataAccess
+@using ClientGraphQL.DataAccess.Model
+
+<h3>Список автомобилей, которые будут свободны в заданные дни</h3>
+
+<div class="form-group">
+    <label for="startDate">Начальная дата:</label>
+    <input type="date" id="startDate" @bind="_startDate" class="form-control" />
+</div>
+<div class="form-group">
+    <label for="endDate">Конечная дата:</label>
+    <input type="date" id="endDate" @bind="_endDate" class="form-control" />
+</div>
+<button class="btn btn-primary" @onclick="FetchAvailableCars">Получить список</button>
+
+@if (_availableCars != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Марка</th>
+                <th>Модель</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var car in _availableCars)
+            {
+                <tr>
+                    <td>@car.Make</td>
+                    <td>@car.Model</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private DateTime? _startDate;
+    private DateTime? _endDate;
+    private List<Car>? _availableCars;
+
+    private async Task FetchAvailableCars()
+    {
+        if (_startDate.HasValue && _endDate.HasValue)
+        {
+            try
+            {
+                string query = $@"
+                query {{
+                    cars(where: {{
+                        rentals: {{ none: {{
+                            startDate: {{ lte: ""{_endDate:yyyy-MM-dd}"" }},
+                            endDate: {{ gte: ""{_startDate:yyyy-MM-dd}"" }}
+                        }}
+                        }}
+                    }}) {{
+                        make
+                        model
+                    }}
+                }}";
+
+                _availableCars = await Query.ExecuteQueryReturnListAsync<Car>("cars", query);
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error fetching available cars: {ex.Message}");
+            }
+        }
+    }
+}

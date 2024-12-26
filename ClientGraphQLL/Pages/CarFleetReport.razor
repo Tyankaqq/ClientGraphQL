@@ -1,0 +1,61 @@
+﻿@page "/CarFleetReport"
+@using ClientGraphQL.DataAccess
+@using ClientGraphQL.DataAccess.Model
+
+<h3>Справка об автомобильном фонде</h3>
+
+@if (_cars == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (_cars.Count == 0)
+{
+    <p><em>Нет автомобилей</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Марка</th>
+                <th>Модель</th>
+                <th>Доступность</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var car in _cars)
+            {
+                <tr>
+                    <td>@car.Make</td>
+                    <td>@car.Model</td>
+                    <td>@car.IsAvailable</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Car>? _cars;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string query = @"
+            query {
+                cars {
+                    make
+                    model
+                    isAvailable
+                }
+            }";
+
+            _cars = await Query.ExecuteQueryReturnListAsync<Car>("cars", query);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching cars: {ex.Message}");
+        }
+    }
+}

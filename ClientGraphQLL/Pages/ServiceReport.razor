@@ -1,0 +1,58 @@
+﻿@page "/ServiceReport"
+@using ClientGraphQL.DataAccess
+@using ClientGraphQL.DataAccess.Model
+
+<h3>Справка об услугах компании и их стоимость</h3>
+
+@if (_services == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (_services.Count == 0)
+{
+    <p><em>Нет услуг</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Название услуги</th>
+                <th>Стоимость</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var service in _services)
+            {
+                <tr>
+                    <td>@service.Name</td>
+                    <td>@service.Price</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Service>? _services;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string query = @"
+            query {
+                services {
+                    name
+                    price
+                }
+            }";
+
+            _services = await Query.ExecuteQueryReturnListAsync<Service>("services", query);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching services: {ex.Message}");
+        }
+    }
+}

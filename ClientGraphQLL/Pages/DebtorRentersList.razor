@@ -1,0 +1,61 @@
+﻿@page "/DebtorRentersList"
+@using ClientGraphQL.DataAccess
+@using ClientGraphQL.DataAccess.Model
+
+<h3>Список арендаторов-должников</h3>
+
+@if (_debtorRenters == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (_debtorRenters.Count == 0)
+{
+    <p><em>Нет арендаторов-должников</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Имя</th>
+                <th>Email</th>
+                <th>Задолженность</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var renter in _debtorRenters)
+            {
+                <tr>
+                    <td>@renter.Name</td>
+                    <td>@renter.Email</td>
+                    <td>@renter.Debt</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Renter>? _debtorRenters;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string query = @"
+            query {
+                renters(where: { debt: { gt: 0 } }) {
+                    name
+                    email
+                    debt
+                }
+            }";
+
+            _debtorRenters = await Query.ExecuteQueryReturnListAsync<Renter>("renters", query);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching debtor renters: {ex.Message}");
+        }
+    }
+}

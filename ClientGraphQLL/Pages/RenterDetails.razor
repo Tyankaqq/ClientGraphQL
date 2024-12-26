@@ -1,0 +1,95 @@
+﻿@page "/RenterDetails/{Id:int}"
+@using ClientGraphQL.DataAccess
+@using ClientGraphQL.DataAccess.Model
+
+<h3>Справка о заданном арендаторе и всех его прокатах автомобилей</h3>
+
+@if (_renter == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>@_renter.Name</h4>
+        </div>
+        <div class="card-body">
+            <p><strong>Email:</strong> @_renter.Email</p>
+        </div>
+    </div>
+
+    <h4>Список прокатов</h4>
+
+    @if (_rentals == null || _rentals.Count == 0)
+    {
+        <p><em>Нет данных о прокатах</em></p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Дата начала</th>
+                    <th>Дата окончания</th>
+                    <th>Стоимость</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var rental in _rentals)
+                {
+                    <tr>
+                        <td>@rental.StartDate.ToString("yyyy-MM-dd")</td>
+                        <td>@rental.EndDate.ToString("yyyy-MM-dd")</td>
+                        <td>@rental.TotalCost:₽</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Renter? _renter;
+    private List<Rental>? _rentals;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string query = $@"
+            query {{
+                renter(id: {Id}) {{
+                    name
+                    email
+                    rentals {{
+                        startDate
+                        endDate
+                        totalCost
+                    }}
+                }}
+            }}";
+
+            var renters = await Query.ExecuteQueryReturnListAsync<Renter>("renter", query);
+
+            if (renters != null && renters.Any())
+            {
+                _renter = renters.First();
+                _rentals = _renter.Rentals?.ToList();
+            }
+            else
+            {
+                _renter = null;
+                _rentals = null;
+            }
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching renter details: {ex.Message}");
+        }
+    }
+}

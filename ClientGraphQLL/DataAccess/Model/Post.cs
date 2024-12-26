@@ -9,7 +9,7 @@ namespace ClientGraphQL.DataAccess.Model
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public long Id { get; set; }
         [Required]
         public string? Title { get; set; }
         [Required]
@@ -22,7 +22,7 @@ namespace ClientGraphQL.DataAccess.Model
 
         public Post()
         {
-            Id = Guid.NewGuid();
+           
             CreateAt = DateTime.Now;
         }
     }

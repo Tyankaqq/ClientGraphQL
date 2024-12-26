@@ -1,0 +1,58 @@
+﻿@page "/OccupiedCarsList"
+@using ClientGraphQL.DataAccess
+@using ClientGraphQL.DataAccess.Model
+
+<h3>Список занятых автомобилей</h3>
+
+@if (_occupiedCars == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (_occupiedCars.Count == 0)
+{
+    <p><em>Нет занятых автомобилей</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Марка</th>
+                <th>Модель</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var car in _occupiedCars)
+            {
+                <tr>
+                    <td>@car.Make</td>
+                    <td>@car.Model</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Car>? _occupiedCars;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string query = @"
+            query {
+                cars(where: { isAvailable: { eq: false } }) {
+                    make
+                    model
+                }
+            }";
+
+            _occupiedCars = await Query.ExecuteQueryReturnListAsync<Car>("cars", query);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching occupied cars: {ex.Message}");
+        }
+    }
+}

@@ -1,0 +1,53 @@
+﻿@page "/CalculateServiceCost"
+@using ClientGraphQL.DataAccess
+@using ClientGraphQL.DataAccess.Model
+
+<h3>Рассчитать стоимость предоставленных услуг в заданный интервал времени</h3>
+
+<div class="form-group">
+    <label for="startDate">Начальная дата:</label>
+    <input type="date" id="startDate" @bind="_startDate" class="form-control" />
+</div>
+<div class="form-group">
+    <label for="endDate">Конечная дата:</label>
+    <input type="date" id="endDate" @bind="_endDate" class="form-control" />
+</div>
+<button class="btn btn-primary" @onclick="CalculateCost">Рассчитать</button>
+
+@if (_totalCost.HasValue)
+{
+    <p>Общая стоимость: @_totalCost:₽</p>
+}
+
+@code {
+    private DateTime? _startDate;
+    private DateTime? _endDate;
+    private decimal? _totalCost;
+
+    private async Task CalculateCost()
+    {
+        if (_startDate.HasValue && _endDate.HasValue)
+        {
+            try
+            {
+                string query = $@"
+                query {{
+                    services(where: {{
+                        startDate: {{ gte: ""{_startDate:yyyy-MM-dd}"" }},
+                        endDate: {{ lte: ""{_endDate:yyyy-MM-dd}"" }}
+                    }}) {{
+                        totalCost
+                    }}
+                }}";
+
+                var services = await Query.ExecuteQueryReturnListAsync<Service>("services", query);
+                _totalCost = services.Sum(s => s.Price);
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error calculating service cost: {ex.Message}");
+            }
+        }
+    }
+}

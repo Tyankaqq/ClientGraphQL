@@ -1,0 +1,58 @@
+﻿@page "/AvailableCarsList"
+@using ClientGraphQL.DataAccess
+@using ClientGraphQL.DataAccess.Model
+
+<h3>Список свободных автомобилей</h3>
+
+@if (_availableCars == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (_availableCars.Count == 0)
+{
+    <p><em>Нет свободных автомобилей</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Марка</th>
+                <th>Модель</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var car in _availableCars)
+            {
+                <tr>
+                    <td>@car.Make</td>
+                    <td>@car.Model</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Car>? _availableCars;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string query = @"
+            query {
+                cars(where: { isAvailable: { eq: true } }) {
+                    make
+                    model
+                }
+            }";
+
+            _availableCars = await Query.ExecuteQueryReturnListAsync<Car>("cars", query);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching available cars: {ex.Message}");
+        }
+    }
+}
