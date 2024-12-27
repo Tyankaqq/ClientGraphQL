@@ -12,6 +12,8 @@ namespace ClientGraphQL.DataAccess.Model
         public string Name { get; set; }
         [Required]
         public string Email { get; set; }
+
+    
         public ICollection<Rental>? Rentals { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿@page "/RenterDetails/{Id:int}"
+﻿@page "/RenterDetails"
 @using ClientGraphQL.DataAccess
 @using ClientGraphQL.DataAccess.Model
 
@@ -30,8 +30,6 @@ else
         <table class="table">
             <thead>
                 <tr>
-                    <th>Дата начала</th>
-                    <th>Дата окончания</th>
                     <th>Стоимость</th>
                 </tr>
             </thead>
@@ -39,8 +37,6 @@ else
                 @foreach (var rental in _rentals)
                 {
                     <tr>
-                        <td>@rental.StartDate.ToString("yyyy-MM-dd")</td>
-                        <td>@rental.EndDate.ToString("yyyy-MM-dd")</td>
                         <td>@rental.TotalCost:₽</td>
                     </tr>
                 }
@@ -65,8 +61,6 @@ else
                     name
                     email
                     rentals {{
-                        startDate
-                        endDate
                         totalCost
                     }}
                 }}

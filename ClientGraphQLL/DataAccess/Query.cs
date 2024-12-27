@@ -15,7 +15,7 @@ namespace ClientGraphQL.DataAccess
 
         static Query()
         {
-            var uri = new Uri("http://localhost:5000/graphql/"); // Убедитесь, что URL правильный
+            var uri = new Uri("http://localhost:5000/graphql/"); 
             var graphQLOptions = new GraphQLHttpClientOptions
             {
                 EndPoint = uri,

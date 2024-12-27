@@ -19,7 +19,6 @@ else
             <tr>
                 <th>Имя</th>
                 <th>Email</th>
-                <th>Задолженность</th>
             </tr>
         </thead>
         <tbody>
@@ -28,7 +27,6 @@ else
                 <tr>
                     <td>@renter.Name</td>
                     <td>@renter.Email</td>
-                    <td>@renter.Debt</td>
                 </tr>
             }
         </tbody>
@@ -44,10 +42,9 @@ else
         {
             string query = @"
             query {
-                renters(where: { debt: { gt: 0 } }) {
+                renters(where: { rentals: { some: { totalCost: { gt: 0 } } } }) {
                     name
                     email
-                    debt
                 }
             }";
 
